@@ -1,6 +1,7 @@
 
 
 <h2>My Heroes</h2>
+<button (click)="onAddHeroesClick()">Add Heroes</button>
 <ul class="heroes">
 <li *ngFor="let hero of Heroes">
     <a routerLink="/detail/{{hero.id}}">
