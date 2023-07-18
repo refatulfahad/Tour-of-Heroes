@@ -26,9 +26,12 @@ export class HeroesComponent implements OnInit {
   }
   
   onAddHeroesClick():void{
-    this.heroService.addHero(this.newHero).subscribe(addedHero => {
-      console.log('Hero added:', addedHero);
-   });
+    this.heroService.addHero(this.newHero).subscribe(addedHero => 
+      this.newHero=addedHero
+   );
   }
   
+  calculate(num1:number,num2:number):number {
+    return num1+num2;
+  }
 }

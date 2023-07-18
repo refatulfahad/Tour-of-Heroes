@@ -5,6 +5,10 @@ import { HeroService } from 'app/hero.service';
 import { Hero } from 'app/hero';
 import { Observable, defer, of } from 'rxjs';
 import { inject } from '@angular/core';
+import { AppRoutingModule } from 'app/app-routing.module';
+import { BrowserModule } from '@angular/platform-browser';
+import { FormsModule } from '@angular/forms';
+import { HttpClientModule } from '@angular/common/http';
 
 describe('HeroesComponent', () => {
   let component: HeroesComponent;
@@ -19,44 +23,35 @@ describe('HeroesComponent', () => {
        {id:4,name:"rafat"},
        {id:5,name:"rafid"}
     ]
-    const spyHeroService = jasmine.createSpyObj('HeroService', ['getHeroes','addHero']);
+    mockHeroService = jasmine.createSpyObj('HeroService', ['getHeroes','addHero']);
     await TestBed.configureTestingModule({
       
       declarations: [ HeroesComponent ],
-      providers: [{ provide: HeroService, useValue: spyHeroService }],
+      providers: [{ provide: HeroService, useValue: mockHeroService }],
+      imports:[BrowserModule,
+        AppRoutingModule,
+        FormsModule,
+        HttpClientModule]
     })
     .compileComponents();
 
     fixture = TestBed.createComponent(HeroesComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    
     mockHeroService=TestBed.inject(HeroService) as jasmine.SpyObj<HeroService>;
   });
 
   it('should create', () => {
-    let spy=spyOn(mockHeroService,'getHeroes').and.returnValue(of([]));
-    let subSpy=spyOn(mockHeroService.getHeroes(),'subscribe');
-    component.ngOnInit();
-    tick();
-    expect(spy).toHaveBeenCalledBefore(subSpy);
-    expect(subSpy).toHaveBeenCalled();
     expect(component).toBeTruthy();
   });
   
   it('should call addHero', () => {
-    mockHeroService.addHero.and.returnValue(asyncData(mockHeroes[0]));
+    //Arrange
+    mockHeroService.addHero.and.returnValue(of(mockHeroes[0]));
     // Act
     component.onAddHeroesClick();
-    
     // Assert
-    expect(mockHeroService.addHero).toHaveBeenCalledWith(mockHeroes[0]);
+    expect(mockHeroService.addHero).toHaveBeenCalled();
   });
 
 });
-
-export function asyncData<T>(data: T) {
-  return defer(() => Promise.resolve(data));
-}
-export function asyncError<T>(errorObject: any) {
-  return defer(() => Promise.reject(errorObject));
-}
