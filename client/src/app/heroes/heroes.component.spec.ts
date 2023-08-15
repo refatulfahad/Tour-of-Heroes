@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed, tick } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 
 import { HeroesComponent } from './heroes.component';
 import { HeroService } from 'app/hero.service';
@@ -13,45 +13,74 @@ import { HttpClientModule } from '@angular/common/http';
 describe('HeroesComponent', () => {
   let component: HeroesComponent;
   let fixture: ComponentFixture<HeroesComponent>;
-  let mockHeroService: jasmine.SpyObj<HeroService>;
-  let mockHeroes:Hero[];
+  let mockHeroService: any;
+
+
   beforeEach(async () => {
-    mockHeroes=[
-       {id: 21, name: 'Riyad Hero'},
-       {id:2,name:"riham"},
-       {id:3,name:"riyad"},
-       {id:4,name:"rafat"},
-       {id:5,name:"rafid"}
-    ]
-    mockHeroService = jasmine.createSpyObj('HeroService', ['getHeroes','addHero']);
+
     await TestBed.configureTestingModule({
-      
-      declarations: [ HeroesComponent ],
-      providers: [{ provide: HeroService, useValue: mockHeroService }],
-      imports:[BrowserModule,
+
+      declarations: [HeroesComponent],
+      providers: [HeroService],
+      imports: [BrowserModule,
         AppRoutingModule,
         FormsModule,
         HttpClientModule]
     })
-    .compileComponents();
+      .compileComponents();
 
     fixture = TestBed.createComponent(HeroesComponent);
     component = fixture.componentInstance;
-    
-    mockHeroService=TestBed.inject(HeroService) as jasmine.SpyObj<HeroService>;
+    mockHeroService = TestBed.inject(HeroService);
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
   });
-  
-  it('should call addHero', () => {
-    //Arrange
-    mockHeroService.addHero.and.returnValue(of(mockHeroes[0]));
-    // Act
+
+  it('for subscribe method in getHeroes', fakeAsync(() => {
+    let spy = spyOn(mockHeroService, 'getHeroes').and.returnValue(of([]));
+    let subSpy = spyOn(mockHeroService.getHeroes(), 'subscribe');
+    component.ngOnInit();
+    tick();
+    expect(spy).toHaveBeenCalledBefore(subSpy);
+    expect(subSpy).toHaveBeenCalled();
+    expect(spy).toHaveBeenCalledTimes(2);
+  }));
+
+  it('test Heroes member', () => {
+    spyOn(mockHeroService, 'getHero').and.returnValue(of([]));
+    component.getHeroes();
+    expect(component.Heroes).toBeTruthy();
+
+    expect(component.Heroes.length).toEqual(9);
+    expect(component.Heroes[0].id).toEqual(12);
+  });
+
+  it('for subscribe method in onAddHeroesClick', fakeAsync(() => {
+    let spy = spyOn(mockHeroService, 'addHero').and.returnValue(of([]));
+    let subSpy = spyOn(mockHeroService.addHero(), 'subscribe');
     component.onAddHeroesClick();
-    // Assert
-    expect(mockHeroService.addHero).toHaveBeenCalled();
+    tick();
+    expect(spy).toHaveBeenCalledBefore(subSpy);
+    expect(subSpy).toHaveBeenCalled();
+    expect(spy).toHaveBeenCalledTimes(2);
+  }));
+
+  it('test newHero member', () => {
+    const test = { id: 21, name: 'Riyad Hero' };
+    spyOn(mockHeroService, 'addHero').and.returnValue(of(test));
+    component.onAddHeroesClick();
+    expect(component.newHero).toBeTruthy();
+    expect(component.newHero.id).toEqual(21);
+  });
+
+  it('should calculate the sum of two numbers', () => {
+    const num1 = 5;
+    const num2 = 10;
+    const expectedResult = num1 + num2;
+    let result = component.calculate(num1, num2);
+    expect(result).toEqual(expectedResult);
   });
 
 });
